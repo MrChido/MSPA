@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'services/database_helper.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
+  databaseFactory = databaseFactoryFfi;
   runApp((SymptomTrackerApp()));
 }
 
@@ -15,22 +18,45 @@ class SymptomTrackerApp extends StatelessWidget {
   }
 }
 
-class CalendarScreen extends StatelessWidget {
+class CalendarScreen extends StatefulWidget {
+  @override
+  State<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends State<CalendarScreen> {
+  Map<int, int> entriesPerDay = {};
+  void updateEntryCount(int day) {
+    setState(() {
+      entriesPerDay[day] = (entriesPerDay[day] ?? 0) + 1;
+      CalendarWidget(
+          entriesPerDay: entriesPerDay, updateEntryCount: updateEntryCount);
+      //print('updated entries for day $day: ${entriesPerDay[day]}');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Daily Journal')),
       body: Column(
         children: [
-          CalendarWidget(),
+          CalendarWidget(
+              entriesPerDay: entriesPerDay, updateEntryCount: updateEntryCount),
           Expanded(child: Center(child: Text('Tap a day to log symptoms'))),
         ],
       ),
     );
   }
+
+  void loadEntries() async {}
 }
 
 class CalendarWidget extends StatelessWidget {
+  final Map<int, int> entriesPerDay;
+  final Function(int) updateEntryCount;
+
+  const CalendarWidget(
+      {required this.entriesPerDay, required this.updateEntryCount});
   @override
   Widget build(BuildContext context) {
     //Placeholder calendar UI with hardcoded data
@@ -40,20 +66,26 @@ class CalendarWidget extends StatelessWidget {
         spacing: 8,
         runSpacing: 8,
         children: List.generate(30, (index) {
-          int score = (index % 13); //simulated score
-          Color color = getColorForScore(score);
+          print('Index is: ${index + 1}');
+          int entryCount = entriesPerDay[index + 1] ?? 0; //simulated score
+          Color color = getColorForEntries(entryCount);
+
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => EntryScreen(day: index + 1)),
+                MaterialPageRoute(
+                  builder: (_) => EntryScreen(
+                      day: index + 1, updateEntryCount: updateEntryCount),
+                ),
               );
             },
             child: CircleAvatar(
               backgroundColor: color,
-              child: score >= 10
-                  ? Icon(Icons.whatshot, color: Colors.white)
-                  : Text('${index + 1}'),
+              child: entryCount >= 10
+                  ? Icon(Icons.whatshot,
+                      color: Colors.white) // Special icon for high entries
+                  : Text('${index + 1}'), // Show correct day number
             ),
           );
         }),
@@ -62,16 +94,17 @@ class CalendarWidget extends StatelessWidget {
   }
 }
 
-Color getColorForScore(int score) {
-  if (score <= 3) return Colors.green;
-  if (score <= 6) return Colors.yellow;
-  if (score <= 9) return Colors.red;
+Color getColorForEntries(int entryCount) {
+  if (entryCount < 5) return Colors.green;
+  if (entryCount >= 6 && entryCount <= 9) return Colors.yellow;
+  if (entryCount >= 10) return Colors.red;
   return Colors.red.shade900;
 }
 
 class EntryScreen extends StatefulWidget {
   final int day;
-  EntryScreen({required this.day});
+  final Function(int) updateEntryCount;
+  const EntryScreen({required this.day, required this.updateEntryCount});
 
   @override
   _EntryScreenState createState() => _EntryScreenState();
@@ -113,6 +146,8 @@ class _EntryScreenState extends State<EntryScreen> {
               value: severity,
               min: 0,
               max: 10,
+              divisions: 10,
+              label: severity.round().toString(), //shows current value
               onChanged: (double newValue) {
                 setState(() {
                   severity = newValue;
@@ -131,6 +166,18 @@ class _EntryScreenState extends State<EntryScreen> {
             TextField(maxLines: 2),
             Text('Daily Activities:'),
             TextField(maxLines: 2),
+
+            //Save Entry Button
+            ElevatedButton(
+              onPressed: () async {
+                await DatabaseHelper()
+                    .insertEntry(widget.day, severity.round(), fatigue, pain);
+                widget.updateEntryCount(widget
+                    .day); // Calls the function passed from CalendarScreen
+                Navigator.pop(context);
+              },
+              child: Text('Save Entry'),
+            ),
           ],
         ),
       ),
