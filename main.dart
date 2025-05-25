@@ -65,7 +65,7 @@ class CalendarWidget extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: List.generate(30, (index) {
+        children: List.generate(31, (index) {
           print('Index is: ${index + 1}');
           int entryCount = entriesPerDay[index + 1] ?? 0; //simulated score
           Color color = getColorForEntries(entryCount);
@@ -114,6 +114,9 @@ class _EntryScreenState extends State<EntryScreen> {
   bool fatigue = false;
   bool pain = false;
   double severity = 4.0;
+  final TextEditingController _bsugarsController = TextEditingController();
+  final TextEditingController _mnmController = TextEditingController();
+  final TextEditingController _activitiesController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,18 +163,38 @@ class _EntryScreenState extends State<EntryScreen> {
             TextField(decoration: InputDecoration(hintText: '10.00PM')),
             Text('Blood Sugar:'),
             TextField(
-              decoration: InputDecoration(hintText: "Enter mulitple readings"),
+              controller: _bsugarsController, //tracks the input
+              decoration: InputDecoration(hintText: "Enter single readings"),
             ),
             Text('Meals/Medications:'),
-            TextField(maxLines: 2),
-            Text('Daily Activities:'),
-            TextField(maxLines: 2),
+            TextField(
+              controller: _mnmController, //tracks the input
+              maxLines: 2,
+              decoration: InputDecoration(
+                  hintText: "Enter Meals and Medications taken"),
+            ),
+
+            Text('Activities:'),
+            TextField(
+              controller: _activitiesController, //tracks the input
+              maxLines: 2,
+              decoration: InputDecoration(hintText: "Enter your activities"),
+            ),
 
             //Save Entry Button
             ElevatedButton(
               onPressed: () async {
-                await DatabaseHelper()
-                    .insertEntry(widget.day, severity.round(), fatigue, pain);
+                String bloodSugarInput =
+                    _bsugarsController.text.trim(); //get user input
+                await DatabaseHelper().insertEntry(
+                  widget.day,
+                  severity.round(),
+                  fatigue,
+                  pain,
+                  bloodSugarInput,
+                  [],
+                  [],
+                );
                 widget.updateEntryCount(widget
                     .day); // Calls the function passed from CalendarScreen
                 Navigator.pop(context);

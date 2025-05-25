@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
@@ -12,6 +11,15 @@ class DatabaseHelper {
     _database = await _initDatabase();
     return _database!;
   }
+
+  // Future<void> resetDatabase() async {
+  //   final db = await database;
+  //   await db.delete('entries');
+  //   await db.execute("DELETE FROM sqlite_sequence WHERE name='entries'");
+  //   print("Database cleared and ID reset!");
+
+  //   await DatabaseHelper().resetDatabase();
+  //}
 
   Future<Database> _initDatabase() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -43,29 +51,12 @@ class DatabaseHelper {
     int severity,
     bool fatigue,
     bool pain,
-    List<String> sugars,
+    String sugars,
     List<String> mnm,
     List<String> activities,
   ) async {
     final db = await database;
-    List<String> activities = [
-      "running",
-      "workout",
-      "reading",
-    ];
-    String activitiesJson = jsonEncode(activities);
-    List<String> mnm = [
-      "lunch",
-      "snack",
-      "tylenol",
-    ];
-    String mnmJson = jsonEncode(mnm);
-    List<String> sugars = [
-      "High",
-      "7",
-      "stable",
-    ];
-    String sugarsJson = jsonEncode(sugars);
+
     await db.insert(
       'entries',
       {
@@ -74,11 +65,12 @@ class DatabaseHelper {
         'fatigue': fatigue ? 1 : 0,
         'pain': pain ? 1 : 0,
         'timestamp': DateTime.now().toIso8601String(),
-        'BSugars': sugarsJson,
-        'mnm': mnmJson,
-        'activities': activitiesJson,
+        'BSugars': sugars,
+        'mnm': jsonEncode(mnm),
+        'activities': jsonEncode(activities),
       },
     );
+    print("Inserted entry: ${await db.query('entries')}"); //verify sugars
   }
 
   Future<List<Map<String, dynamic>>> getEntriesForDay(int day) async {
