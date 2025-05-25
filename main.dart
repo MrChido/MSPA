@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'dart:convert';
 
 void main() {
   databaseFactory = databaseFactoryFfi;
@@ -25,12 +26,27 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   Map<int, int> entriesPerDay = {};
+
+  @override
+  void initState() {
+    super.initState();
+    loadEntries();
+  }
+
+  void loadEntries() async {
+    final dbHelper = DatabaseHelper();
+    for (int day = 1; day <= 30; day++) {
+      int count = await dbHelper.getEntryCountForDay(day);
+      setState(() {
+        entriesPerDay[day] = count;
+      });
+      print("day $day has $count entries"); //debuging
+    }
+  }
+
   void updateEntryCount(int day) {
     setState(() {
       entriesPerDay[day] = (entriesPerDay[day] ?? 0) + 1;
-      CalendarWidget(
-          entriesPerDay: entriesPerDay, updateEntryCount: updateEntryCount);
-      //print('updated entries for day $day: ${entriesPerDay[day]}');
     });
   }
 
@@ -47,8 +63,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
     );
   }
-
-  void loadEntries() async {}
 }
 
 class CalendarWidget extends StatelessWidget {
@@ -68,7 +82,7 @@ class CalendarWidget extends StatelessWidget {
         children: List.generate(31, (index) {
           print('Index is: ${index + 1}');
           int entryCount = entriesPerDay[index + 1] ?? 0; //simulated score
-          Color color = getColorForEntries(entryCount);
+          Color color = getColorForEntries(entriesPerDay[index + 1] ?? 0);
 
           return GestureDetector(
             onTap: () {
@@ -95,7 +109,8 @@ class CalendarWidget extends StatelessWidget {
 }
 
 Color getColorForEntries(int entryCount) {
-  if (entryCount < 5) return Colors.green;
+  if (entryCount == 0) return Colors.grey;
+  if (entryCount >= 1 && entryCount <= 5) return Colors.green;
   if (entryCount >= 6 && entryCount <= 9) return Colors.yellow;
   if (entryCount >= 10) return Colors.red;
   return Colors.red.shade900;
@@ -115,6 +130,8 @@ class _EntryScreenState extends State<EntryScreen> {
   bool pain = false;
   double severity = 4.0;
   final TextEditingController _bsugarsController = TextEditingController();
+  List<String> mnm = [];
+  List<String> activities = [];
   final TextEditingController _mnmController = TextEditingController();
   final TextEditingController _activitiesController = TextEditingController();
   @override
@@ -186,15 +203,27 @@ class _EntryScreenState extends State<EntryScreen> {
               onPressed: () async {
                 String bloodSugarInput =
                     _bsugarsController.text.trim(); //get user input
+
+                List<String> mnm = _mnmController.text.trim().split(",");
+                List<String> activities =
+                    _activitiesController.text.trim().split(",");
+
+                String mnmInput = mnm.isNotEmpty ? jsonEncode(mnm) : '[]';
+                String activitiesInput =
+                    activities.isNotEmpty ? jsonEncode(activities) : '[]';
+
                 await DatabaseHelper().insertEntry(
                   widget.day,
                   severity.round(),
                   fatigue,
                   pain,
                   bloodSugarInput,
-                  [],
-                  [],
+                  mnm,
+                  activities,
                 );
+                print("mnm before inserting: $mnmInput");
+                print("activities before inserting: $activitiesInput");
+
                 widget.updateEntryCount(widget
                     .day); // Calls the function passed from CalendarScreen
                 Navigator.pop(context);

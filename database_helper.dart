@@ -56,6 +56,10 @@ class DatabaseHelper {
     List<String> activities,
   ) async {
     final db = await database;
+    String mnmInput = mnm.isNotEmpty ? jsonEncode(mnm) : '[]';
+    String activitiesInput =
+        activities.isNotEmpty ? jsonEncode(activities) : '[]';
+    print("$day, $severity, $sugars,$mnmInput, $activitiesInput");
 
     await db.insert(
       'entries',
@@ -66,15 +70,33 @@ class DatabaseHelper {
         'pain': pain ? 1 : 0,
         'timestamp': DateTime.now().toIso8601String(),
         'BSugars': sugars,
-        'mnm': jsonEncode(mnm),
-        'activities': jsonEncode(activities),
+        'mnm': mnmInput,
+        'activities': activitiesInput,
       },
     );
     print("Inserted entry: ${await db.query('entries')}"); //verify sugars
+    // print("Inserted mnm: ${jsonEncode(mnm)}"); //debug
+    // print("Inserted activites: ${activities}"); //debug
+  }
+
+  Future<int> getEntryCountForDay(int day) async {
+    final db = await database;
+    List<Map<String, dynamic>> result =
+        await db.query('entries', where: 'day =?', whereArgs: [day]);
+
+    return result.length;
   }
 
   Future<List<Map<String, dynamic>>> getEntriesForDay(int day) async {
     final db = await database;
-    return await db.query('entries', where: 'day =?', whereArgs: [day]);
+    List<Map<String, dynamic>> result =
+        await db.query('entries', where: 'day =?', whereArgs: [day]);
+
+    return result.map((entry) {
+      entry['mnm'] = entry['mnm'] != null ? jsonDecode(entry['mnm']) : [];
+      entry['activities'] =
+          entry['activities'] != null ? jsonDecode(entry['activities']) : [];
+      return entry;
+    }).toList();
   }
 }
