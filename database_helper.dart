@@ -27,7 +27,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE entries(
@@ -39,11 +39,20 @@ class DatabaseHelper {
             timestamp TEXT,
             BSugars TEXT,
             mnm TEXT,
-            activities TEXT 
+            activities TEXT,
+            symptoms TEXT,
+            wake INTEGER,
+            sleep INTEGER 
           )
         ''');
       },
     );
+  }
+
+  Future<void> checkDEntries() async {
+    final db = await DatabaseHelper().database;
+    var result = await db.rawQuery("PRAGMA table_info(entries)");
+    print(result);
   }
 
   Future<void> insertEntry(
@@ -52,14 +61,19 @@ class DatabaseHelper {
     bool fatigue,
     bool pain,
     String sugars,
-    List<String> mnm,
-    List<String> activities,
+    String mnm,
+    String activities,
+    String symptoms,
+    int wake,
+    int sleep,
   ) async {
     final db = await database;
     String mnmInput = mnm.isNotEmpty ? jsonEncode(mnm) : '[]';
     String activitiesInput =
         activities.isNotEmpty ? jsonEncode(activities) : '[]';
-    print("$day, $severity, $sugars,$mnmInput, $activitiesInput");
+    String symptomsInput = symptoms.isNotEmpty ? jsonEncode(symptoms) : '[]';
+    print(
+        "$day, $severity, $sugars,$mnmInput, $activitiesInput, $symptomsInput");
 
     await db.insert(
       'entries',
@@ -68,10 +82,13 @@ class DatabaseHelper {
         'severity': severity,
         'fatigue': fatigue ? 1 : 0,
         'pain': pain ? 1 : 0,
+        'wake': wake,
+        'sleep': sleep,
         'timestamp': DateTime.now().toIso8601String(),
         'BSugars': sugars,
         'mnm': mnmInput,
         'activities': activitiesInput,
+        'symptoms': symptomsInput,
       },
     );
     print("Inserted entry: ${await db.query('entries')}"); //verify sugars
@@ -96,6 +113,8 @@ class DatabaseHelper {
       entry['mnm'] = entry['mnm'] != null ? jsonDecode(entry['mnm']) : [];
       entry['activities'] =
           entry['activities'] != null ? jsonDecode(entry['activities']) : [];
+      entry['symptoms'] =
+          entry['symptoms'] != null ? jsonDecode(entry['symptoms']) : [];
       return entry;
     }).toList();
   }

@@ -134,6 +134,32 @@ class _EntryScreenState extends State<EntryScreen> {
   List<String> activities = [];
   final TextEditingController _mnmController = TextEditingController();
   final TextEditingController _activitiesController = TextEditingController();
+  final TextEditingController _symptomsController = TextEditingController();
+  final TextEditingController _wakeTimeController = TextEditingController();
+  final TextEditingController _sleepTimeController = TextEditingController();
+
+  String convertToMilitaryTime(String timeInput) {
+    timeInput = timeInput.trim().toLowerCase(); //normalize the case usage
+    RegExp regExp = RegExp(r'(\d{1,2})[:.](\d{2})\s*(am|pm)?');
+    Match? match = regExp.firstMatch(timeInput);
+
+    if (match != null) {
+      int hour = int.parse(match.group(1)!);
+      int minutes = int.parse(match.group(2)!);
+      String? period = match.group(3);
+
+      if (period == "pm" && hour != 12) {
+        hour += 12; //add 12 hours to the input
+      } else if (period == "am" && hour == 12) {
+        hour = 0; //convert 12 AM to 00
+      }
+
+      return "${hour.toString().padLeft(2, '0')}${minutes.toString().padLeft(2, '0')}";
+    }
+
+    return "Invalid Format";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,7 +187,7 @@ class _EntryScreenState extends State<EntryScreen> {
                 });
               },
             ),
-            Text('Symptom Severity:'),
+            Text('Pain Severity:'),
             Slider(
               value: severity,
               min: 0,
@@ -175,9 +201,13 @@ class _EntryScreenState extends State<EntryScreen> {
               },
             ),
             Text('Wake Time:'),
-            TextField(decoration: InputDecoration(hintText: '7:00AM')),
+            TextField(
+                controller: _wakeTimeController,
+                decoration: InputDecoration(hintText: '7:00AM')),
             Text('Bed Time'),
-            TextField(decoration: InputDecoration(hintText: '10.00PM')),
+            TextField(
+                controller: _sleepTimeController,
+                decoration: InputDecoration(hintText: '10.00PM')),
             Text('Blood Sugar:'),
             TextField(
               controller: _bsugarsController, //tracks the input
@@ -186,7 +216,6 @@ class _EntryScreenState extends State<EntryScreen> {
             Text('Meals/Medications:'),
             TextField(
               controller: _mnmController, //tracks the input
-              maxLines: 2,
               decoration: InputDecoration(
                   hintText: "Enter Meals and Medications taken"),
             ),
@@ -194,8 +223,14 @@ class _EntryScreenState extends State<EntryScreen> {
             Text('Activities:'),
             TextField(
               controller: _activitiesController, //tracks the input
-              maxLines: 2,
               decoration: InputDecoration(hintText: "Enter your activities"),
+            ),
+
+            Text('Symptoms:'),
+            TextField(
+              controller: _symptomsController, //tracks symptom input
+              decoration:
+                  InputDecoration(hintText: 'Enter your current sympoms'),
             ),
 
             //Save Entry Button
@@ -203,24 +238,46 @@ class _EntryScreenState extends State<EntryScreen> {
               onPressed: () async {
                 String bloodSugarInput =
                     _bsugarsController.text.trim(); //get user input
+                //int bloodSugarValue = int.tryParse(bloodSugarInput) ?? 0;
 
-                List<String> mnm = _mnmController.text.trim().split(",");
-                List<String> activities =
-                    _activitiesController.text.trim().split(",");
+                List<String> mnm = _mnmController.text
+                    .trim()
+                    .split(",")
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty)
+                    .toList();
+                List<String> activities = _activitiesController.text
+                    .trim()
+                    .split(",")
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty)
+                    .toList();
+                List<String> symptoms = _symptomsController.text
+                    .trim()
+                    .split(",")
+                    .map((e) => e.trim())
+                    .where((e) => e.isNotEmpty)
+                    .toList();
 
-                String mnmInput = mnm.isNotEmpty ? jsonEncode(mnm) : '[]';
-                String activitiesInput =
-                    activities.isNotEmpty ? jsonEncode(activities) : '[]';
+                String mnmInput = jsonEncode(mnm);
+                String activitiesInput = jsonEncode(activities);
+                String symptomsInput = jsonEncode(symptoms);
+                String wakeTimeMilitary =
+                    convertToMilitaryTime(_wakeTimeController.text);
+                String sleepTimeMilitary =
+                    convertToMilitaryTime(_sleepTimeController.text);
 
                 await DatabaseHelper().insertEntry(
-                  widget.day,
-                  severity.round(),
-                  fatigue,
-                  pain,
-                  bloodSugarInput,
-                  mnm,
-                  activities,
-                );
+                    widget.day,
+                    severity.round(),
+                    fatigue,
+                    pain,
+                    bloodSugarInput,
+                    mnmInput,
+                    activitiesInput,
+                    symptomsInput,
+                    int.parse(wakeTimeMilitary),
+                    int.parse(sleepTimeMilitary));
                 print("mnm before inserting: $mnmInput");
                 print("activities before inserting: $activitiesInput");
 
