@@ -1,6 +1,6 @@
-This is the app that the wife wants to track how she feels
-It is meant to record her fatigue, her pain as boolian
-A scale from 1-10 of her pain tolerance
+This is the app that my wife wants to use to track how she feels
+It is meant to record her fatigue, her pain,
+A scale from 1-10 of her pain threshold
 As well as documenting her sleeping hours, her blood readings,
 medications and meals that she is taking
 and what her activities are
@@ -10,9 +10,9 @@ I am sure  this is the very basic level of what  she wants out of this app.
 As of right now, it only shows 30 days being selectable at a time. 
 
 The next steps are: 
-Completing the database entry
+Completing the database entry *done*
 retrieving the database entries into a display
-refining a few of the aesthetics
+refining a few of the aesthetics *in progress*
 ensuring compatibility with devices ( using my Pixel 8 Pro, Her Galaxy 24, and quite possibly the nieces Iphone*)
 
 Program dev timeline
@@ -35,5 +35,10 @@ accepted in the wake/time fields. using either : or .
 Also, I added code to ensure that when somebody enters am or pm that it is evaluated in the 24-hour cycle, preparing for future math as needed.
 Planning the implementation of database entry review practices.
 
+6/1/2025
+Development is slowing down, right now I need to focus on finding employment, This project is still moving forward, just at a slower pace.
+Today a button was added to trigger a app shift into "review mode" and some of the white space was adressed. More development will happen after i get a few hours of
+doordashing In.
+
 *that will take some research
-Due to the resulting research, for the time being, iOS implementation is not feasible because of cost.
+Due to the resulting research, iOS implementation is not feasible due to cost.
