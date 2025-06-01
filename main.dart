@@ -50,15 +50,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
-  @override
+  @override // this is what the user opens up to
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Daily Journal')),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           CalendarWidget(
               entriesPerDay: entriesPerDay, updateEntryCount: updateEntryCount),
-          Expanded(child: Center(child: Text('Tap a day to log symptoms'))),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text('Tap a day to log symptoms'),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("Review Entries"),
+          )
         ],
       ),
     );
