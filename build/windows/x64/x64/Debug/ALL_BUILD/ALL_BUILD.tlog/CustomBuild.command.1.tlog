@@ -1,0 +1,10 @@
+^C:\USERS\RAIDA\ONEDRIVE\DESKTOP\MELSAPP\MSTA\MELZERS_SYMPTOM_TRACKER\WINDOWS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/windows -BC:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64 --check-stamp-file C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

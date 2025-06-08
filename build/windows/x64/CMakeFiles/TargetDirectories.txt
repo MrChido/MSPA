@@ -1,0 +1,10 @@
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/CMakeFiles/INSTALL.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/CMakeFiles/ALL_BUILD.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/CMakeFiles/ZERO_CHECK.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_plugin.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_app.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/flutter/CMakeFiles/flutter_assemble.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/flutter/CMakeFiles/INSTALL.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/runner/CMakeFiles/melzers_symptom_tracker.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/runner/CMakeFiles/INSTALL.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/build/windows/x64/runner/CMakeFiles/ALL_BUILD.dir

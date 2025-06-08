@@ -1,0 +1,2 @@
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/android/app/.cxx/Debug/4m3h2h6w/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/raida/OneDrive/Desktop/MelsApp/MSTA/melzers_symptom_tracker/android/app/.cxx/Debug/4m3h2h6w/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,10 @@
+^C:\USERS\RAIDA\ONEDRIVE\DESKTOP\MELSAPP\MSTA\MELZERS_SYMPTOM_TRACKER\BUILD\WINDOWS\X64\CMAKEFILES\C5A73EDBA9715B2F5D7689E337F6B814\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
