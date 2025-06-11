@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'services/database_helper.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:convert';
 import 'entry_screen.dart';
 
 void main() {
