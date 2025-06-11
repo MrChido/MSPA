@@ -26,11 +26,23 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   Map<int, int> entriesPerDay = {};
+  bool isReviewMode = false;
+  List<int> reviewedDays = [];
 
   @override
   void initState() {
     super.initState();
     loadEntries();
+  }
+
+  void loadReviewedDays() async {
+    final dbHelper = DatabaseHelper();
+    List<int> entryDays =
+        await dbHelper.getDaysWithEntries(); // new helper function
+
+    setState(() {
+      reviewedDays = entryDays;
+    });
   }
 
   void loadEntries() async {
@@ -58,15 +70,28 @@ class _CalendarScreenState extends State<CalendarScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           CalendarWidget(
-              entriesPerDay: entriesPerDay, updateEntryCount: updateEntryCount),
+            entriesPerDay: entriesPerDay,
+            updateEntryCount: updateEntryCount,
+            reviewedDays: reviewedDays,
+            isReviewMode: isReviewMode,
+          ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text('Tap a day to log symptoms'),
           ),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              setState(() {
+                isReviewMode = !isReviewMode;
+                if (isReviewMode) {
+                  loadReviewedDays();
+                } else {
+                  reviewedDays.clear();
+                }
+              });
+            },
             child: Text("Review Entries"),
-          )
+          ),
         ],
       ),
     );
@@ -76,9 +101,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
 class CalendarWidget extends StatelessWidget {
   final Map<int, int> entriesPerDay;
   final Function(int) updateEntryCount;
+  final List<int> reviewedDays;
+  final bool isReviewMode;
 
-  const CalendarWidget(
-      {required this.entriesPerDay, required this.updateEntryCount});
+  const CalendarWidget({
+    required this.entriesPerDay,
+    required this.updateEntryCount,
+    required this.reviewedDays,
+    required this.isReviewMode,
+  });
   @override
   Widget build(BuildContext context) {
     //Placeholder calendar UI with hardcoded data
@@ -90,7 +121,12 @@ class CalendarWidget extends StatelessWidget {
         children: List.generate(31, (index) {
           print('Index is: ${index + 1}');
           int entryCount = entriesPerDay[index + 1] ?? 0; //simulated score
-          Color color = getColorForEntries(entriesPerDay[index + 1] ?? 0);
+          Color color = getColorForEntries(entriesPerDay[index + 1] ?? 0,
+              index + 1, reviewedDays, isReviewMode);
+
+          Color numberColor = (isReviewMode && reviewedDays.contains(index + 1))
+              ? Color(0xFFE6E6FA)
+              : Colors.black;
 
           return GestureDetector(
             onTap: () {
@@ -107,7 +143,9 @@ class CalendarWidget extends StatelessWidget {
               child: entryCount >= 10
                   ? Icon(Icons.whatshot,
                       color: Colors.white) // Special icon for high entries
-                  : Text('${index + 1}'), // Show correct day number
+                  : Text('${index + 1}',
+                      style: TextStyle(
+                          color: numberColor)), // Show correct day number
             ),
           );
         }),
@@ -116,7 +154,14 @@ class CalendarWidget extends StatelessWidget {
   }
 }
 
-Color getColorForEntries(int entryCount) {
+Color getColorForEntries(
+  int entryCount,
+  int day,
+  List<int> reviewedDays,
+  bool isReviewMode,
+) {
+  if (isReviewMode && reviewedDays.contains(day))
+    return Color(0xFF4B0082); //indigo color
   if (entryCount == 0) return Colors.grey;
   if (entryCount >= 1 && entryCount <= 5) return Colors.green;
   if (entryCount >= 6 && entryCount <= 9) return Colors.yellow;
