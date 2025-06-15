@@ -110,61 +110,100 @@ class CalendarWidget extends StatelessWidget {
     required this.reviewedDays,
     required this.isReviewMode,
   });
-  @override
-  Widget build(BuildContext context) {
-    //Placeholder calendar UI with hardcoded data
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: List.generate(31, (index) {
-          print('Index is: ${index + 1}');
-          int entryCount = entriesPerDay[index + 1] ?? 0; //simulated score
-          Color color = getColorForEntries(entriesPerDay[index + 1] ?? 0,
-              index + 1, reviewedDays, isReviewMode);
 
-          Color numberColor = (isReviewMode && reviewedDays.contains(index + 1))
-              ? Color(0xFFE6E6FA)
-              : Colors.black;
+  // Define `getColorForEntries` Outside of `build()`
+  Color getColorForEntries(
+      int entryCount, int day, List<int> reviewedDays, bool isReviewMode) {
+    if (isReviewMode && reviewedDays.contains(day)) return Color(0xFF4B0082);
+    if (entryCount == 0) return Colors.grey;
+    if (entryCount >= 1 && entryCount <= 5) return Colors.green;
+    if (entryCount >= 6 && entryCount <= 9) return Colors.yellow;
+    if (entryCount >= 10) return Colors.red;
+    return Colors.red.shade900;
+  }
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EntryScreen(
-                      day: index + 1, updateEntryCount: updateEntryCount),
-                ),
-              );
-            },
-            child: CircleAvatar(
-              backgroundColor: color,
-              child: entryCount >= 10
-                  ? Icon(Icons.whatshot,
-                      color: Colors.white) // Special icon for high entries
-                  : Text('${index + 1}',
-                      style: TextStyle(
-                          color: numberColor)), // Show correct day number
-            ),
-          );
-        }),
+  // Move `buildCalendarCell` OUTSIDE `build()` and define it properly
+  Widget buildCalendarCell(int day, BuildContext context) {
+    if (day > 30) return SizedBox(); // Prevent overflow
+
+    Color color = getColorForEntries(
+        entriesPerDay[day] ?? 0, day, reviewedDays, isReviewMode);
+    Color numberColor = (isReviewMode && reviewedDays.contains(day))
+        ? Color(0xFFE6E6FA)
+        : Colors.black;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                EntryScreen(day: day, updateEntryCount: updateEntryCount),
+          ),
+        );
+      },
+      child: CircleAvatar(
+        backgroundColor: color,
+        child: Text('$day', style: TextStyle(color: numberColor)),
       ),
     );
   }
-}
 
-Color getColorForEntries(
-  int entryCount,
-  int day,
-  List<int> reviewedDays,
-  bool isReviewMode,
-) {
-  if (isReviewMode && reviewedDays.contains(day))
-    return Color(0xFF4B0082); //indigo color
-  if (entryCount == 0) return Colors.grey;
-  if (entryCount >= 1 && entryCount <= 5) return Colors.green;
-  if (entryCount >= 6 && entryCount <= 9) return Colors.yellow;
-  if (entryCount >= 10) return Colors.red;
-  return Colors.red.shade900;
+  @override
+  Widget build(BuildContext context) {
+    int firstWeekday =
+        DateTime(DateTime.now().year, DateTime.now().month, 1).weekday;
+
+    return Column(
+      children: [
+        // Weekday labels
+        Table(
+          defaultColumnWidth: FixedColumnWidth(50),
+          children: [
+            TableRow(
+              children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                  .map((day) => Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Text(
+                          day,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+        // Calendar rows
+        Table(
+          defaultColumnWidth: FixedColumnWidth(50),
+          children: [
+            TableRow(
+              children: List.generate(7, (dayIndex) {
+                if (dayIndex < firstWeekday - 1)
+                  return SizedBox(); // Empty space before first day
+                int actualDay = dayIndex - firstWeekday + 2;
+                return actualDay <= 30
+                    ? buildCalendarCell(actualDay, context)
+                    : SizedBox();
+              }),
+            ),
+            ...List.generate(4, (weekIndex) {
+              return TableRow(
+                children: List.generate(7, (dayIndex) {
+                  int actualDay =
+                      (weekIndex * 7 + dayIndex + (8 - firstWeekday));
+                  actualDay = (weekIndex == 0)
+                      ? (dayIndex - firstWeekday + 2)
+                      : actualDay;
+                  if (actualDay > 30) return SizedBox();
+                  return buildCalendarCell(actualDay, context);
+                }),
+              );
+            }),
+          ],
+        ),
+      ],
+    );
+  }
 }
