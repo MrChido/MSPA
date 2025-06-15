@@ -16,3 +16,7 @@ Wife sugetsted the boolean toggle for Pain is unnecisary since therews a value s
 I also relegated the Entry Screen to its own dart file. It ensures the code is shapely, readable, and easily searchable for updates
 also got git to finaly upload everything, so that others can fiddle with the code. or try the app itself before it goes life on 
 google play at the end of summer.
+
+6/15/2025
+started to have some tredmendous progress with getting the dates to look like they are in a calendar format.
+Its nowhere complete in being a monthy calendar but its progresss. we still have a ways to go.
